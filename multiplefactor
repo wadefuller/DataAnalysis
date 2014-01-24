@@ -1,0 +1,212 @@
+--Movie Ratings Regression Analysis--
+> download.file("http://www.rossmanchance.com/iscam2/data/movies03RT.txt",destfile="data/movies.txt")
+trying URL 'http://www.rossmanchance.com/iscam2/data/movies03RT.txt'
+Content type 'text/plain' length 6534 bytes
+opened URL
+downloaded 6534 bytes
+
+> movies <- read.table("data/movies.txt",sep="\t",header=T,quote="")
+> head(movies)
+                 X score rating
+1 2 Fast 2 Furious  48.9  PG-13
+2    28 Days Later  78.2      R
+3      A Guy Thing  39.5  PG-13
+4      A Man Apart  42.9      R
+5    A Mighty Wind  79.9  PG-13
+6 Agent Cody Banks  57.9     PG
+             genre box.office
+1 action/adventure    127.146
+2           horror     45.065
+3       rom comedy     15.545
+4 action/adventure     26.248
+5           comedy     17.781
+6 action/adventure     47.811
+  running.time
+1          107
+2          113
+3          101
+4          110
+5           91
+6          102
+> plot(movies$score ~ jitter(as.numeric(movies$rating)),col="blue",xaxt="n",pch=19)
+> axis(side=1,at=unique(as.numeric(movies$rating)),labels=unique(movies$rating))
+> meanRatings <- tapply(movies$score,movies$rating,mean)
+> points(1:4,meanRatings,col="red",pch="-",cex=5)
+> meanRatings <- tapply(movies$score,movies$rating,mean)
+> axis(side=1,at=unique(as.numeric(movies$rating)),labels=unique(movies$rating))
+> meanRatings
+       G       PG    PG-13 
+67.65000 55.05714 55.83538 
+       R 
+55.63000 
+> lm1 <- lm(movies$score ~ as.factor(movies$rating))
+> summary(lm1)
+
+Call:
+lm(formula = movies$score ~ as.factor(movies$rating))
+
+Residuals:
+    Min      1Q  Median      3Q 
+-26.430  -9.981  -0.983   9.344 
+    Max 
+ 38.970 
+
+Coefficients:
+                              Estimate
+(Intercept)                     67.650
+as.factor(movies$rating)PG     -12.593
+as.factor(movies$rating)PG-13  -11.815
+as.factor(movies$rating)R      -12.020
+                              Std. Error
+(Intercept)                        7.193
+as.factor(movies$rating)PG         7.849
+as.factor(movies$rating)PG-13      7.411
+as.factor(movies$rating)R          7.476
+                              t value
+(Intercept)                     9.405
+as.factor(movies$rating)PG     -1.604
+as.factor(movies$rating)PG-13  -1.594
+as.factor(movies$rating)R      -1.608
+                              Pr(>|t|)
+(Intercept)                     <2e-16
+as.factor(movies$rating)PG       0.111
+as.factor(movies$rating)PG-13    0.113
+as.factor(movies$rating)R        0.110
+                                 
+(Intercept)                   ***
+as.factor(movies$rating)PG       
+as.factor(movies$rating)PG-13    
+as.factor(movies$rating)R        
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 14.39 on 136 degrees of freedom
+Multiple R-squared:  0.01985,  Adjusted R-squared:  -0.001769 
+F-statistic: 0.9182 on 3 and 136 DF,  p-value: 0.434
+
+> confint(lm1)
+                                  2.5 %
+(Intercept)                    53.42478
+as.factor(movies$rating)PG    -28.11385
+as.factor(movies$rating)PG-13 -26.47100
+as.factor(movies$rating)R     -26.80328
+                                 97.5 %
+(Intercept)                   81.875222
+as.factor(movies$rating)PG     2.928133
+as.factor(movies$rating)PG-13  2.841772
+as.factor(movies$rating)R      2.763285
+--Because this interval encompasses zero, it is unlikely that there is a difference in the average score. Zero means that it is possible that a G movie can be rated the same as an R movie.--
+> lm2 <- lm(movies$score ~ relevel(movies$rating,ref="R"))
+> summary(lm2)
+
+Call:
+lm(formula = movies$score ~ relevel(movies$rating, ref = "R"))
+
+Residuals:
+    Min      1Q  Median      3Q 
+-26.430  -9.981  -0.983   9.344 
+    Max 
+ 38.970 
+
+Coefficients:
+                                       Estimate
+(Intercept)                             55.6300
+relevel(movies$rating, ref = "R")G      12.0200
+relevel(movies$rating, ref = "R")PG     -0.5729
+relevel(movies$rating, ref = "R")PG-13   0.2054
+                                       Std. Error
+(Intercept)                                2.0346
+relevel(movies$rating, ref = "R")G         7.4755
+relevel(movies$rating, ref = "R")PG        3.7411
+relevel(movies$rating, ref = "R")PG-13     2.7062
+                                       t value
+(Intercept)                             27.342
+relevel(movies$rating, ref = "R")G       1.608
+relevel(movies$rating, ref = "R")PG     -0.153
+relevel(movies$rating, ref = "R")PG-13   0.076
+                                       Pr(>|t|)
+(Intercept)                              <2e-16
+relevel(movies$rating, ref = "R")G        0.110
+relevel(movies$rating, ref = "R")PG       0.879
+relevel(movies$rating, ref = "R")PG-13    0.940
+                                          
+(Intercept)                            ***
+relevel(movies$rating, ref = "R")G        
+relevel(movies$rating, ref = "R")PG       
+relevel(movies$rating, ref = "R")PG-13    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 14.39 on 136 degrees of freedom
+Multiple R-squared:  0.01985,	Adjusted R-squared:  -0.001769 
+F-statistic: 0.9182 on 3 and 136 DF,  p-value: 0.434
+
+> confint(lm2)
+                                           2.5 %
+(Intercept)                            51.606500
+relevel(movies$rating, ref = "R")G     -2.763285
+relevel(movies$rating, ref = "R")PG    -7.971015
+relevel(movies$rating, ref = "R")PG-13 -5.146371
+                                         97.5 %
+(Intercept)                            59.65350
+relevel(movies$rating, ref = "R")G     26.80328
+relevel(movies$rating, ref = "R")PG     6.82530
+relevel(movies$rating, ref = "R")PG-13  5.55714
+
+-- Is there a difference in score between any of the movie ratings? --
+> anova(lm1)
+Analysis of Variance Table
+
+Response: movies$score
+                          Df
+as.factor(movies$rating)   3
+Residuals                136
+                          Sum Sq
+as.factor(movies$rating)   570.1
+Residuals                28148.6
+                         Mean Sq
+as.factor(movies$rating)  190.04
+Residuals                 206.97
+                         F value
+as.factor(movies$rating)  0.9182
+Residuals                       
+                         Pr(>F)
+as.factor(movies$rating)  0.434
+Residuals 
+-- P Value of .43 doesnt suggest a strong difference between the two --
+-- Creating the sum of squares residual plot for the two variables --
+> gMovies <- movies[movies$rating=="G",]; xVals <- seq(0.2,0.8,length=4)
+> plot(xVals,gMovies$score,ylab="Score",xaxt="n",xlim=c(0,1),pch=19)
+> ablne(h=mean(gMovies$score),col="blue",lwd=3); abline(h=mean(movies$score),col="red",lwd=3)
+Error: could not find function "ablne"
+> abline(h=mean(gMovies$score),col="blue",lwd=3); abline(h=mean(movies$score),col="red",lwd=3)
+> segments(xVals+0.01,rep(mean(gMovies$score),length(xVals)),col="red",lwd=2)
+Error in segments(xVals + 0.01, rep(mean(gMovies$score), length(xVals)),  : 
+  one of 'x1' and 'y1' must be given
+> segments(xVals+0.01,rep(mean(gMovies$score),length(xVals)),xVals+0.01,rep(mean(movies$score),length(xVals)),col="red",lwd=2)
+> segments(xVals-0.01,gMovies$score,xVals-0.01, rep(mean(gMovies$score),length(xVals)),col="green",lwd=2)
+
+
+-- A different way to analyze the factors and their correlations --
+> lm3 <- aov(movies$score ~ as.factor(movies$rating))
+> TukeyHSD(lm3)
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = movies$score ~ as.factor(movies$rating))
+
+$`as.factor(movies$rating)`
+                diff        lwr
+PG-G     -12.5928571 -33.007572
+PG-13-G  -11.8146154 -31.092121
+R-G      -12.0200000 -31.464413
+PG-13-PG   0.7782418  -8.614575
+R-PG       0.5728571  -9.157919
+R-PG-13   -0.2053846  -7.244534
+               upr     p adj
+PG-G      7.821858 0.3795429
+PG-13-G   7.462890 0.3853921
+R-G       7.424413 0.3776123
+PG-13-PG 10.171059 0.9964487
+R-PG     10.303633 0.9987149
+R-PG-13   6.833765 0.9998425
